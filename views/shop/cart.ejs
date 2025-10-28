@@ -1,0 +1,47 @@
+<h1>Your Cart </h1>
+<p>List of Products</p>
+        <div class="grid">
+                <%
+                if(cart){
+                cart.items.forEach(product => { %>
+                    <article class="card product-item">
+                        <header class="card__header">
+                            <h1 class="product__title"><%= product.title %></h1>
+                        </header>
+                        <div class="card__image">
+                            <img src="<%= product.imageUrl %>"  class="product__image"  loading="lazy"  crossorigin="anonymous"  width="200" height="300"
+                                alt="A Book">
+                        </div>
+                        <div class="card__content">
+                            <h2 class="product__price">$<%= product.price %></h2>
+                            <p class="product__description"><%= product.description %></p>
+                            <b class="product__description">Qty: <%= product.quantity %></b>
+                        </div>
+                        <div class="card__actions">
+                            <form action="/cart/delete-product" method="POST">
+                                <input type="hidden" name="productId" value="<%= product.productId %>">
+                                <button type="submit" class="btn">Remove</button>
+                            </form>
+                            
+                            <a href="/products/<%= product.productId %>" class="btn">View Details</a>
+                        </div>
+                    </article>
+               <% }); }else{
+                 %>
+                    <h2>Your cart is empty. Start shopping.</h2>
+                 <%
+               } %>
+               <%
+                    if(cart){%>
+                        <div class="col-md-6">
+                                <label for="">Total Amount: <%= cart.total %></label>
+                        </div>
+                        <form action="/cart-order" method="post">
+                            <button type="submit" style="background-color: brown; color:aliceblue; padding:5px; border:none; font-size:18px;" name="Submit">Order Now</button>
+                        </form>
+                   <% }
+               %>
+               
+               
+            </div>
+    

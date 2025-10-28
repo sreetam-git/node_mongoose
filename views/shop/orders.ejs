@@ -1,0 +1,23 @@
+<h1>Your Cart </h1>
+<p>List of Orders</p>
+        <div class="grid">
+                <%
+                if(orders.length > 0){%>
+                    <ul>
+                        <%
+                        orders.forEach(order => { %>
+                            <li><h1>#<%= order.id %></h1></li>
+                            <ul>
+                                <% order.products.forEach(item =>{
+                                    %>
+                                    <li><%= item.title %>(<%= item.orderItem.quantity %>)</li>
+                                    <%
+                                })%>
+                            </ul>
+                        <% });%>
+                    </ul>
+
+                    <% } %>
+                   
+            </div>
+    

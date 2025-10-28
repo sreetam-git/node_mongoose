@@ -1,0 +1,29 @@
+<h1>Welcome to the Product Management System</h1>
+<p>List of Products</p>
+        <div class="grid">
+                <%
+                prods.forEach(product => { %>
+                    <article class="card product-item">
+                        <header class="card__header">
+                            <h1 class="product__title"><%= product.title %></h1>
+                        </header>
+                        <div class="card__image">
+                            <img src="<%= product.imageUrl %>"  class="product__image"  loading="lazy"  crossorigin="anonymous"  width="200" height="300"
+                                alt="A Book">
+                        </div>
+                        <div class="card__content">
+                            <h2 class="product__price">$<%= product.price %></h2>
+                            <p class="product__description"><%= product.description %></p>
+                        </div>
+                        <div class="card__actions">
+                            <form action="/cart/add" method="POST">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <button type="submit" class="btn">Add to Cart</button>
+                            </form>
+                            
+                            <a href="/products/<%= product._id %>" class="btn">View Details</a>
+                        </div>
+                    </article>
+               <% });  %>
+            </div>
+    

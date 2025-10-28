@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= docTitle %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/product.css">
+</head>
+<body>
+  <%- include('header.ejs') %>
+
+  <main>
+    <%- body %> <!-- this is where child content will render -->
+  </main>
+
+  <%- include('footer.ejs') %> 
+</body>
+</html>
