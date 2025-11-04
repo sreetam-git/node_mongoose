@@ -5,7 +5,7 @@ const User = require('./models/user');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const errorController = require('./controllers/error');
-const { connectDB } = require('./util/database');
+const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
 const app = express();
@@ -20,35 +20,19 @@ app.use(expressLayouts);
 app.set('layout', 'layouts/layout');
 
 app.use((req, res, next) => {
-  if (!db) {
-    return res.status(503).send("⚠️ Database is not available right now. Please try again later.");
-  }
-  User.findById("68f05b189d66e5ed1ee8192d")
-  .then(user => {
-    // console.log('user found: ', user);
-    req.user = user;
-    next();
-  })
-  .catch(err => console.log(err));
+  
 });
 
 app.use('/admin',adminRoutes);
 app.use(shopRoutes);
 app.use(errorController.get404);
 
-async function startServer(){
-    try{
-        db = await connectDB();
-        console.log('mongodb connected');
-    }catch(err){
-        console.error("❌ MongoDB connection failed. Server will still run.");
-        console.log(err);
-    }
-
-    app.listen(3000, () => {
-        console.log("🚀 Server running on port 3000");
-    });
-}
-
-startServer();
+mongoose.connect(
+  'mongodb+srv://nsreetam_db_user:z94p3hAtTcV8k0l4@cluster0.gtinb2c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+)
+.then(() => {
+  console.log("✅ Mongoose Connected!");
+  app.listen(3000);
+})
+.catch(err => console.log(err));
 
