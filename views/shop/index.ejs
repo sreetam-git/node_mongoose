@@ -18,10 +18,10 @@
                         <div class="card__actions">
                             <form action="/cart/add" method="POST">
                                 <input type="hidden" name="productId" value="<%= product._id %>">
-                                <button type="submit" class="btn">Add to Cart</button>
+                                <button type="submit" class="btn btn-primary">Add to Cart</button>
                             </form>
                             
-                            <a href="/products/<%= product._id %>" class="btn">View Details</a>
+                            <a href="/products/<%= product._id %>" class="btn btn-warning">View Details</a>
                         </div>
                     </article>
                <% });  %>

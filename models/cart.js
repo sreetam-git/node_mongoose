@@ -1,141 +1,105 @@
-// const { ObjectId } = require('mongodb');
-// const { getDB } = require('../util/database');
+const mongoose = require("mongoose");
 
-// class Cart {
+const Schema = mongoose.Schema;
 
-//     //get users existing cart
-//     static async getCart(userId){
-//         const db = getDB();
-//         return await db.collection('carts').findOne(
-//             { userId: userId }
-//         );
-//     }
+const cartSchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
-//     //add to cart
-//     static async addItem(userId, product){
-//         const db = getDB();
-//         const cartCollection = db.collection('carts');
-//         const productData = {
-//             productId: product._id,
-//             title: product.title,
-//             price: product.price,
-//             quantity: 1,
-//             imageUrl: product.imageUrl
-//         };
-//         const existingCart = await cartCollection.findOne({
-//             userId: userId
-//         });
-//         if(!existingCart){
-//             //create a new cart
-//             await cartCollection.insertOne({
-//                 userId: userId,
-//                 items: [productData],
-//                 total: productData.price * productData.quantity,
-//                 createdAt: Date.now(),
-//                 updatedAt: Date.now()
-//             });
-//             return {message: 'Cart created and item added'};
-//         }
+    items: [
+      {
+        productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+        title: String,
+        price: Number,
+        imageUrl: String,
+        quantity: { type: Number, default: 1 }
+      }
+    ],
 
-//         //update existing cart
-//         const existingItem = existingCart.items.find(
-//             item => item.productId.toString() === productData.productId.toString()
-//         );
+    total: { type: Number, default: 0 }
+  },
+  { timestamps: true }
+);
 
-//         if(existingItem){
-//             //increment quantity
-//             await cartCollection.updateOne(
-//                 {
-//                     userId: userId, "items.productId": productData.productId
-//                 },
-//                 {
-//                     $inc: {
-//                         "items.$.quantity": productData.quantity,
-//                         total: productData.price * productData.quantity
-//                     },
-//                     $set:{
-//                         updatedAt: Date.now()
-//                     }
-//                 }
-//             );
-//             return {message: 'Item quantity updated'};
-//         } else {
-//             // add new item
-//             await cartCollection.updateOne({
-//                     userId: userId
-//                 },
-//                 {
-//                     $push: { items: productData},
-//                     $inc: { total: productData.quantity * productData.price },
-//                     $set: { updatedAt: Date.now() }
-//                 }
-//             );
-//             return { message: "New item added to cart." };
-//         }
+cartSchema.statics.addItem = async function (userId, product) {
+  const cart = await this.findOne({ userId });
+
+  const productData = {
+    productId: product._id,
+    title: product.title,
+    price: product.price,
+    quantity: 1,
+    imageUrl: product.imageUrl
+  };
+
+  if (!cart) {
+    return await this.create({
+      userId,
+      items: [productData],
+      total: product.price
+    });
+  }
+
+  const existingItem = cart.items.find(
+    item => item.productId.toString() === product._id.toString()
+  );
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+    cart.total += product.price;
+  } else {
+    cart.items.push(productData);
+    cart.total += product.price;
+  }
+
+  return await cart.save();
+};
 
 
-//     }
+cartSchema.statics.removeItem = async function (userId, productId) {
+  const cart = await this.findOne({ userId });
 
-//     static async removeItem(userId, productId){
-//         const db = getDB();
-//         const cartCollection = db.collection('carts');
+  if (!cart) return { message: "Cart not found" };
 
-//         const cart = await cartCollection.findOne({ userId: userId});
-//         if(!cart){
-//             return { message: "Cart not found"};
-//         }
-//         console.log('cart found: ',cart);
-//         const item = cart.items.find(i => i.productId.toString() === productId.toString());
-//         if(!item){
-//             return { message: "Cart item not found"};
-//         }
+  const item = cart.items.find(i => i.productId.toString() === productId.toString());
+  if (!item) return { message: "Item not found in cart" };
 
-//         await cartCollection.updateOne(
-//             { userId: userId},
-//             {
-//                 $pull: { items: { productId: ObjectId.createFromHexString(productId)}},
-//                 $inc: { total: - item.price * item.quantity},
-//                 $set: { updatedAt: Date.now() }
-//             }
-//         );
-//         return { message: "Item removed from cart." };
+  cart.total -= item.price * item.quantity;
 
-//     }
+  cart.items = cart.items.filter(i => i.productId.toString() !== productId.toString());
 
-//     /**
-//      * clear the entire cart
-//      */
-//     static async clearCart(userId){
-//         const db = getDB();
-//         await db.collection('carts').deleteOne({ userId: userId});
-//         return { message: "Cart deleted successfully" };
-//     }
+  await cart.save();
+  return { message: "Item removed" };
+};
 
-//     /**
-//      * Update item quantity manually
-//      */
-//     static async updateQuantity(userId, productId, newQty){
-//         const db = getDB();
-//         const cartCollection = db.collection('carts');
 
-//         const cart = cartCollection.findOne(
-//             { userId: ObjectId.createFromHexString(userId)}
-//         );
-//         if(!cart) return { message: "cart not found"};
+cartSchema.statics.clearCart = async function (userId) {
+  await this.deleteOne({ userId });
+  return { message: "Cart cleared" };
+};
 
-//         const item = cart.items.find(i => i.productId.toString() === productId.toString());
-//         if(!item) return { message: "Item not found"};
+cartSchema.statics.updateQuantity = async function (userId, productId, newQty) {
+  const cart = await this.findOne({ userId });
 
-//         const priceDiff = (newQty - item.quantity)*item.price;
-//         await cartCollection.updateOne(
-//             { userId: ObjectId.createFromHexString(userId)},
-//             {
-//                 $set: { "items.$.quantity": newQty, updatedAt: Date.now() },
-//                 $inc: { total: priceDiff }
-//             }
-//         );
-//         return { message: "Item quantity updated" };
-//     }
-// }
+  if (!cart) return { message: "Cart not found" };
 
-// module.exports = Cart;
+  const item = cart.items.find(i => i.productId.toString() === productId);
+
+  if (!item) return { message: "Item not found" };
+
+  const priceDiff = (newQty - item.quantity) * item.price;
+
+  item.quantity = newQty;
+  cart.total += priceDiff;
+
+  await cart.save();
+  return { message: "Quantity updated" };
+};
+
+
+cartSchema.statics.getCart = function (userId) {
+  return this.findOne({ userId }).populate("items.productId");
+};
+
+
+module.exports = mongoose.model("Cart", cartSchema);

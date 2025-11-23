@@ -1,28 +1,15 @@
-// const { getDB } = require('../util/database');
-// const { ObjectId } = require('mongodb')
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-// class User {
-//     constructor(username, email){
-//         this.name = username;
-//         this.email = email;
-//     }
+const userSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    }
+});
 
-//     save(){
-//         const db = getDB();
-//         return db.collection('users').insertOne(this)
-//         .then(result => console.log(result))
-//         .catch(err => console.log(err));
-//     }
-
-//     static findById(id){
-//         const db = getDB();
-//         return db.collection('users').findOne({_id: ObjectId.createFromHexString(id)})
-//         .then(result => {
-//             // console.log('user find by id: ',result);
-//             return result;
-//         })
-//         .catch(err => console.log(err));
-//     }
-// }
-
-// module.exports = User;
+module.exports = mongoose.model('User', userSchema);
