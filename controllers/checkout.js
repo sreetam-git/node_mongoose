@@ -6,7 +6,7 @@ const Order = require('../models/order');
 const product = require('../models/product');
 
 exports.postCheckout = async (req, res, next) => {
-    const userId = req.user._id;
+    const userId = req.session.user._id;
     const paymentMethod = 'razorpay'; // e.g., 'razorpay', 'cod', etc.
     // const shippingAddressId = req.body.addressId;
     const idempotencyKey = req.headers['idempotency-key'] || null;
@@ -62,7 +62,7 @@ exports.postCheckout = async (req, res, next) => {
         session.startTransaction();
 
         try {
-            const userId = req.user._id;
+            const userId = req.session.user._id;
             // const { paymentMethod, shippingCost, subTotal, tax, discount, total, orderItems, idempotencyKey } = req.body;
 
             // -- Create order object --

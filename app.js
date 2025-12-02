@@ -1,15 +1,21 @@
 const express = require('express');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 const User = require('./models/user');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
 const app = express();
-let db;
+const store = new MongoDBStore({
+  uri: 'mongodb+srv://nsreetam_db_user:z94p3hAtTcV8k0l4@cluster0.gtinb2c.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0',
+  collection: 'sessions'
+})
 app.set('view engine', 'ejs');
 app.set('views', 'views'); 
 
@@ -17,6 +23,13 @@ app.set('views', 'views');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressLayouts);
+app.use(session({
+  secret: 'node application',
+  resave: false,
+  saveUninitialized: false,
+  store: store
+}));
+
 app.set('layout', 'layouts/layout');
 
 app.use(async(req, res, next) => {
@@ -27,6 +40,7 @@ app.use(async(req, res, next) => {
 
 app.use('/admin',adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose.connect(

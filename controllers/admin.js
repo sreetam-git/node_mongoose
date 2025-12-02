@@ -8,7 +8,8 @@ exports.getProducts = (req, res, next) => {
         res.render('admin/product-list', {
           prods: products,
           docTitle: 'Admin Products',
-          path: '/admin/products'
+          path: '/admin/products',
+          isLoggedIn: req.session.isLoggedIn
         });
     })
     .catch(err => {
@@ -21,7 +22,7 @@ exports.getProducts = (req, res, next) => {
 exports.getAddProduct = (req, res, next) => { 
     console.log('add product form');
   // res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
-  res.render('admin/add-product', {docTitle: 'Add Product', path: '/admin/add-product'});
+  res.render('admin/add-product', {docTitle: 'Add Product', path: '/admin/add-product', isLoggedIn: req.session.isLoggedIn});
 };
 
 exports.postAddProduct = (req, res, next) => {
@@ -47,7 +48,7 @@ exports.getEditProduct = (req, res, next) => {
         return res.status(404).render('404', { docTitle: 'Product Not Found', path: '/404' });
     }
     res.render('admin/edit-product', 
-      {product: product, docTitle: 'Edit Product', path:'admin/products'});
+      {product: product, docTitle: 'Edit Product', path:'admin/products', isLoggedIn: req.session.isLoggedIn});
   }).catch(err => console.log(err));
 };
 

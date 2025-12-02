@@ -6,7 +6,7 @@ const { where } = require('sequelize');
 exports.getIndex = (req, res, next) => {
     Product.find()
     .then(products => {
-        res.render('shop/index', { prods: products, docTitle: 'Shop', path: '/' });
+        res.render('shop/index', { prods: products, docTitle: 'Shop', path: '/',isLoggedIn: req.session.isLoggedIn });
     })
     .catch(err => {
         console.log(err);
@@ -17,7 +17,7 @@ exports.getIndex = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
     Product.find()
     .then(products => {
-        res.render('shop/product-list', { prods: products, docTitle: 'Shop', path: '/home' });
+        res.render('shop/product-list', { prods: products, docTitle: 'Shop', path: '/home', isLoggedIn: req.session.isLoggedIn });
     })
     .catch(err => {
         console.log(err);
@@ -29,7 +29,7 @@ exports.getProductDetails = (req, res, next) => {
     const productId = req.params.productId;
     Product.findById(productId).then(product => {
         console.log(product);
-        res.render('shop/product-details', { product: product, docTitle: 'Product Details', path: '/products' });
+        res.render('shop/product-details', { product: product, docTitle: 'Product Details', path: '/products', isLoggedIn: req.session.isLoggedIn });
     }).catch(err => console.log(err));
    
 }
@@ -42,7 +42,7 @@ exports.postAddToCart = async (req, res, next) => {
     Product.findById(productId).then( product => {
         // Add item to user's cart
         console.log('single product:',product);
-        const result = Cart.addItem(req.user._id, product);
+        const result = Cart.addItem(req.session.user._id, product);
         if(result){
             res.redirect('/cart');
         }
@@ -58,13 +58,14 @@ exports.postAddToCart = async (req, res, next) => {
 
 
 exports.getCart = async (req, res, next) => {
-    const cart = await Cart.getCart(req.user._id);
-    res.render('shop/cart', { docTitle: 'Cart', path: '/cart', cart: cart });
+
+    const cart = await Cart.getCart(req.session.user._id);
+    res.render('shop/cart', { docTitle: 'Cart', path: '/cart', cart: cart, isLoggedIn: req.session.isLoggedIn });
 }
 
 exports.postDeleteCartProduct = (req, res, next) => {
     const productId = req.body.productId;
-    const result = Cart.removeItem(req.user._id, productId);
+    const result = Cart.removeItem(req.session.user._id, productId);
     if(result){
         res.redirect('/cart');
     }

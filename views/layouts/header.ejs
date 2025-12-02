@@ -13,12 +13,23 @@
             <li>
                 <a href="/orders" class="<%= path === '/orders' ? 'active' : '' %>">Orders</a>
             </li>
+            <% if(isLoggedIn){ %>
+                <li>
+                    <a href="/admin/add-product" class="<%= path === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
+                </li>
+                <li>
+                    <a href="/admin/products" class="<%= path === '/admin/products' ? 'active' : '' %>">Admin Products</a>
+                </li>
+            <% } %>
+            <% if(!isLoggedIn){ %>
             <li>
-                <a href="/admin/add-product" class="<%= path === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
+                <a href="/login" class="<%= path === '/login' ? 'active' : '' %>">Login</a>
             </li>
-            <li>
-                <a href="/admin/products" class="<%= path === '/admin/products' ? 'active' : '' %>">Admin Products</a>
-            </li>
+            <% }else{%>
+                <form action="logout" method="post">
+                    <input type="submit" class="btn btn-primary" name="submit" value="Logout">
+                </form>
+            <% } %>
         </ul>
     </nav>
 </header>
