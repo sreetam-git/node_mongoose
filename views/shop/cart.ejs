@@ -19,7 +19,7 @@
                         </div>
                         <div class="card__actions">
                             <form action="/cart/delete-product" method="POST">
-                                <input type="hidden" name="productId" value="<%= product.productId %>">
+                                <input type="hidden" name="productId" value="<%= product.productId._id %>">
                                 <button type="submit" class="btn">Remove</button>
                             </form>
                             

@@ -13,12 +13,14 @@
                             <h2 class="product__price">$<%= product.price %></h2>
                             <p class="product__description"><%= product.description %></p>
                         </div>
-                        <div class="card__actions">
-                            <form action="/cart/add" method="POST">
-                                <input type="hidden" name="productId" value="<%= product.id %>">
-                                <button type="submit" class="btn">Add to Cart</button>
-                            </form>
-                        </div>
+                        <% if(isLoggedIn){ %>
+                            <div class="card__actions">
+                                <form action="/cart/add" method="POST">
+                                    <input type="hidden" name="productId" value="<%= product.id %>">
+                                    <button type="submit" class="btn">Add to Cart</button>
+                                </form>
+                            </div>
+                        <% } %>
                     </article>
                
             </div>

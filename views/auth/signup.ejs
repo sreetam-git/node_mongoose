@@ -94,23 +94,33 @@
   </style>
 
   <div class="container">
-    <form class="login-box" method="post" action="/login">
-      <h2>Welcome Back</h2>
+    <form class="login-box" method="post" action="/signup">
+      <h2>Register</h2>
+
+      <div class="input-box">
+        <input type="name" name="name" required />
+        <label>Name*</label>
+      </div>
 
       <div class="input-box">
         <input type="email" name="email" required />
-        <label>Email</label>
+        <label>Email*</label>
       </div>
 
       <div class="input-box">
         <input type="password" name="password" required />
-        <label>Password</label>
+        <label>Password*</label>
       </div>
 
-      <button type="submit" class="btn">Login</button>
+      <div class="input-box">
+        <input type="repassword" name="rePassword" required />
+        <label>Renter Password*</label>
+      </div>
 
-      <p class="signup-text">Don't have an account?
-        <a href="/signup">Sign Up</a>
+      <button type="submit" class="btn">Signup</button>
+
+      <p class="signup-text">Already have an account?
+        <a href="/login">Login</a>
       </p>
     </form> 
   </div>

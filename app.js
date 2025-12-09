@@ -32,11 +32,11 @@ app.use(session({
 
 app.set('layout', 'layouts/layout');
 
-app.use(async(req, res, next) => {
-  const user = await User.findById('69231f2590a8e8e94b258366');
-  req.user = user;
-  next();
-});
+// app.use(async(req, res, next) => {
+//   const user = await User.findById('69231f2590a8e8e94b258366');
+//   req.user = user;
+//   next();
+// });
 
 app.use('/admin',adminRoutes);
 app.use(shopRoutes);

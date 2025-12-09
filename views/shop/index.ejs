@@ -16,11 +16,12 @@
                             <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
+                            <% if(isLoggedIn){ %>
                             <form action="/cart/add" method="POST">
                                 <input type="hidden" name="productId" value="<%= product._id %>">
                                 <button type="submit" class="btn btn-primary">Add to Cart</button>
                             </form>
-                            
+                            <% } %>
                             <a href="/products/<%= product._id %>" class="btn btn-warning">View Details</a>
                         </div>
                     </article>
