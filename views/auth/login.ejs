@@ -96,7 +96,9 @@
   <div class="container">
     <form class="login-box" method="post" action="/login">
       <h2>Welcome Back</h2>
-
+      <% if(errorMessage) { %>
+        <div class="alert alert-danger" style="color: tomato; font-weight:600;"><%= errorMessage %></div>
+      <% } %>
       <div class="input-box">
         <input type="email" name="email" required />
         <label>Email</label>
@@ -112,5 +114,8 @@
       <p class="signup-text">Don't have an account?
         <a href="/signup">Sign Up</a>
       </p>
+      <div class="signup-text">
+        <a href="/reset-password">Reset Password</a>
+      </div>
     </form> 
   </div>

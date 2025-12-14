@@ -10,9 +10,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.0",
+    "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^5.0.0",
+    "cripto": "^1.1.4",
+    "csurf": "^1.11.0",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
@@ -21,6 +26,8 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
     "mysql2": "^3.14.3",
+    "nodemailer": "^7.0.11",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^3.1.10",
     "pug": "^3.0.3",
     "sequelize": "^6.37.7"

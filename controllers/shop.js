@@ -6,7 +6,7 @@ const { where } = require('sequelize');
 exports.getIndex = (req, res, next) => {
     Product.find()
     .then(products => {
-        res.render('shop/index', { prods: products, docTitle: 'Shop', path: '/',isLoggedIn: req.session.isLoggedIn });
+        res.render('shop/index', { prods: products, docTitle: 'Shop', path: '/', isLoggedIn: req.session.isLoggedIn });
     })
     .catch(err => {
         console.log(err);

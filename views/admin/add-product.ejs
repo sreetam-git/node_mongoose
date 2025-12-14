@@ -1,6 +1,7 @@
 <!-- we need to create a html page with add product form and in header navigation bar-->
         <h1>Welcome to the Product Management System</h1>
         <form class="form" action="/admin/product" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <label for="name">Name:</label>
             <input class="form-control" type="text" id="name" name="name" required><br><br>
 

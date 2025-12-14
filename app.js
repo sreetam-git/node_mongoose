@@ -9,6 +9,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
+const flash = require('connect-flash');
 
 const bodyParser = require('body-parser');
 const app = express();
@@ -29,6 +30,7 @@ app.use(session({
   saveUninitialized: false,
   store: store
 }));
+app.use(flash());
 
 app.set('layout', 'layouts/layout');
 

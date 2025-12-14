@@ -26,6 +26,12 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+    const sentToken = req.body._csrf;
+    const sessionToken = req.session.csrfToken;
+
+    if (!sentToken || sentToken !== sessionToken) {
+        return res.status(403).send("Invalid CSRF token");
+    }
     const product = new Product({
         title: req.body.name, 
         price: req.body.price, 
