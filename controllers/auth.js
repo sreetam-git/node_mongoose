@@ -1,8 +1,8 @@
 const user = require('../models/user');
 const bcrypt = require('bcryptjs');
 const sgMail = require('@sendgrid/mail');
-require('dotenv').config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// require('dotenv').config();
+sgMail.setApiKey('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');
 
 exports.getLogin = (req, res, next) => {
     // console.log(req.get('Cookie'));
