@@ -1,6 +1,8 @@
 const user = require('../models/user');
 const bcrypt = require('bcryptjs');
 const sgMail = require('@sendgrid/mail');
+const crypto = require('crypto');
+const User = require('../models/user');
 // require('dotenv').config();
 sgMail.setApiKey('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');
 
@@ -125,5 +127,35 @@ exports.getResetPassword = async (req, res, next) => {
 }
 
 exports.postResetPassword = async (req, res, next) => {
+    const email = req.body.email;
+    if(email != ''){
+        //send mail to user
+        const token = crypto.randomBytes(32, (err, buffer) => {
+            if (err) {
+                console.log(err);
+            }else{
+                return buffer.toString('hex');
+            }
+        });
+        const user = await User.findOne({email: email});
+        if(user){
+            user.forgotPasswordToken = token;
+            user.tokenExpiry = Date.now() + 3600000;
+            if(user.save()){
+                 const msg = {
+                    to: 'nsreetam@gmail.com',
+                    from: 'info@sreevanatech.com',
+                    subject: 'Password Reset',
+                    html: `<strong>Please click the <a href="http://localhost:3000/reset-password/${token}">Link</a> to reset your password.</strong>`,
+                };
 
+                await sgMail.send(msg);
+                req.flash('success', 'A password reset mail has been sent to your mail.');
+                return res.redirect('/reset-password');
+            }
+        }else{
+            req.flash('error', 'No account with that email found.');
+            return res.redirect('/reset-password');
+        }
+    }
 }

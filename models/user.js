@@ -13,6 +13,12 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    forgotPasswordToken: {
+        type: String
+    },
+    tokenExpiry:{
+        type: Date
     }
 });
 
