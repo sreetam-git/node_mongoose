@@ -2,14 +2,17 @@ const Product = require("../models/product");
 // const { getDB } = require("../util/database");
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
-    .select('title price description imageUrl _id')
+  console.log(req.session.user);
+  Product.find({userId: req.session.user._id})
+    .select('title price description imageUrl _id userId')
     .then(products => {
+      console.log(products);
         res.render('admin/product-list', {
           prods: products,
           docTitle: 'Admin Products',
           path: '/admin/products',
-          isLoggedIn: req.session.isLoggedIn
+          isLoggedIn: req.session.isLoggedIn,
+          loggedInUser: req.session.user
         });
     })
     .catch(err => {
@@ -36,7 +39,8 @@ exports.postAddProduct = (req, res, next) => {
         title: req.body.name, 
         price: req.body.price, 
         description: req.body.description, 
-        imageUrl: req.body.imageUrl
+        imageUrl: req.body.imageUrl,
+        userId: req.session.user._id
     });
     product.save().then((result) => {
       console.log(result);
@@ -63,7 +67,9 @@ exports.postUpdateProduct = (req, res, next) => {
     // const product = new Product(req.body.name, req.body.price, req.body.description, req.body.imageUrl);
     const id = req.body.id;
     Product.findById(id).then(product => {
-      
+        if(product.userId.toString() !== req.session.user._id.toString()){
+          return res.redirect('/admin/products');
+        }
         product.title = req.body.name, 
         product.price = req.body.price, 
         product.description = req.body.description, 
@@ -73,7 +79,7 @@ exports.postUpdateProduct = (req, res, next) => {
     })
     .then(res => console.log('record updated.'))
     .catch(err => console.log(err));
-    res.redirect('/products');
+    res.redirect('/admin/products');
 };
 
 exports.postDeleteProduct = (req, res, next) => {

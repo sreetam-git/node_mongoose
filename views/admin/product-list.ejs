@@ -16,11 +16,13 @@
                             <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
+                            <% if(loggedInUser._id.equals(product.userId)){%>
                             <a href="/admin/edit-product/<%= product._id %>" class="btn btn-primary">Edit Product</a>
                             <br>
                             <form action="/admin/delete-product/<%= product._id %>" method="POST">
                                 <button type="submit" class="btn btn-danger">Delete Product</button>
                             </form>
+                            <% } %>
                         </div>
                     </article>
                <% });  %>

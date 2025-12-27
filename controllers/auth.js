@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const sgMail = require('@sendgrid/mail');
 const crypto = require('crypto');
 const User = require('../models/user');
+const { validationResult } = require('express-validator');
+const { response } = require('express');
 // require('dotenv').config();
 sgMail.setApiKey('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');
 
@@ -19,7 +21,10 @@ exports.getLogin = (req, res, next) => {
         docTitle: 'Login',
         path: '/login',
         isLoggedIn: req.session.isLoggedIn,
-        errorMessage: message
+        errorMessage: message,
+        oldInput: {
+            email: ''
+        }
     });
    
 };
@@ -28,12 +33,24 @@ exports.postLogin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        // 1. Basic validation
-        if (!email || !password) {
-            req.flash("error", "Email and password are required");
-            return res.redirect("/login");
-        }
 
+        // 1. Basic validation
+        // if (!email || !password) {
+        //     req.flash("error", "Email and password are required");
+        //     return res.redirect("/login");
+        // }
+
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            console.log(errors);
+            return res.status(422).render('auth/login', {
+                docTitle: 'Login',
+                path: '/login',
+                isLoggedIn: req.session.isLoggedIn,
+                errorMessage: errors.array()[0].msg,
+                oldInput: { email }
+            });
+        }
         // 2. Find user by email
         const userData = await user.findOne({ email });
 
@@ -67,7 +84,8 @@ exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         docTitle: 'Signup',
         path: '/signup',
-        isLoggedIn: req.session.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn,
+        errorMessage: ''
     });
    
 };
@@ -77,6 +95,19 @@ exports.postSignup = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const rePassword = req.body.rePassword;
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        console.log(errors);
+        return res.status(422).render('auth/signup', {
+            docTitle: 'Signup',
+            path: '/signup',
+            isLoggedIn: req.session.isLoggedIn,
+            errorMessage: errors.array()[0].msg,
+            oldInput: { name, email }
+        });
+    }
+
 
     const userExists = await user.findOne({email:email});
     
@@ -130,32 +161,83 @@ exports.postResetPassword = async (req, res, next) => {
     const email = req.body.email;
     if(email != ''){
         //send mail to user
-        const token = crypto.randomBytes(32, (err, buffer) => {
-            if (err) {
-                console.log(err);
-            }else{
-                return buffer.toString('hex');
-            }
-        });
+        const token = crypto.randomBytes(32).toString('hex');
         const user = await User.findOne({email: email});
         if(user){
-            user.forgotPasswordToken = token;
-            user.tokenExpiry = Date.now() + 3600000;
-            if(user.save()){
-                 const msg = {
-                    to: 'nsreetam@gmail.com',
-                    from: 'info@sreevanatech.com',
-                    subject: 'Password Reset',
-                    html: `<strong>Please click the <a href="http://localhost:3000/reset-password/${token}">Link</a> to reset your password.</strong>`,
-                };
+            console.log(`http://localhost:3000/reset-password/${token}`);
+            const updated = await User.updateOne(
+                { _id: user._id },
+                {
+                    forgotPasswordToken: token,
+                    tokenExpiry: Date.now() + 3600000
+                }
+            );
+            if(updated){
+                //  const msg = {
+                //     to: 'nsreetam@gmail.com',
+                //     from: 'info@sreevanatech.com',
+                //     subject: 'Password Reset',
+                //     html: `<strong>Please click the <a href="http://localhost:3000/reset-password/${token}">Link</a> to reset your password.</strong>`,
+                // };
 
-                await sgMail.send(msg);
+                // await sgMail.send(msg);
+                
                 req.flash('success', 'A password reset mail has been sent to your mail.');
                 return res.redirect('/reset-password');
             }
         }else{
             req.flash('error', 'No account with that email found.');
             return res.redirect('/reset-password');
+        }
+    }
+}
+
+exports.getNewPassword = async (req, res, next) => {
+    const token = req.params.token;
+    const user = await User.findOne({forgotPasswordToken: token, tokenExpiry: {$gt: Date.now()}});
+    if(!user){
+        req.flash('error', 'No account with that email found.');
+        return res.redirect('/reset-password');
+    }
+    let message = req.flash('error');
+    if(message.length > 0){
+        message = message[0];
+    }else{
+        message = null;
+    }
+    res.render('auth/new-password', {
+        docTitle: 'New Password',
+        path: '/new-password',
+        isLoggedIn: req.session.isLoggedIn,
+        errorMessage: message,
+        userId: user._id,
+        token: token
+    });
+}
+
+exports.postChangePassword = async (req, res, next) => {
+    const password = req.body.password;
+    const rePassword = req.body.re_password;
+    const userId = req.body.userId;
+    const token = req.body.token;
+    if(password == rePassword){
+        const user = await User.findOne({id: userId});
+        if(user){
+            const updated = await User.updateOne(
+                { _id: user._id },
+                {
+                    forgotPasswordToken: undefined,
+                    tokenExpiry: undefined,
+                    password: await bcrypt.hash(password, 12)
+                }
+            );
+            if(updated){
+                req.flash('success', 'Password updated.');
+                return res.redirect('/login');
+            }
+        }else{
+            req.flash('error', 'No account with that email found.');
+            return res.redirect('/reset-password/'+token);
         }
     }
 }
