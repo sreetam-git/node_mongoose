@@ -1,4 +1,6 @@
+const { response } = require("express");
 const Product = require("../models/product");
+const { validationResult } = require('express-validator');
 // const { getDB } = require("../util/database");
 
 exports.getProducts = (req, res, next) => {
@@ -16,8 +18,10 @@ exports.getProducts = (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err);
-    });;
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+    });
   
 };
 
@@ -29,17 +33,40 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+    console.log(req);
     const sentToken = req.body._csrf;
     const sessionToken = req.session.csrfToken;
 
     if (!sentToken || sentToken !== sessionToken) {
         return res.status(403).send("Invalid CSRF token");
     }
+
+    const errors = validationResult(req);
+    console.log(errors);
+    if(!errors.isEmpty()){
+      console.log(errors.array()[0].msg);
+      return res.status(422).render('admin/add-product', {
+        docTitle: 'Add Product', 
+        path: '/admin/add-product', 
+        isLoggedIn: req.session.isLoggedIn,
+        errorMessage: errors.array()[0].msg
+      });
+    }
+    const image = req.file;
+    if(!image){
+      console.log(errors.array()[0].msg);
+      return res.status(422).render('admin/add-product', {
+        docTitle: 'Add Product', 
+        path: '/admin/add-product', 
+        isLoggedIn: req.session.isLoggedIn,
+        errorMessage: 'Please select an valid image file.'
+      });
+    }
     const product = new Product({
         title: req.body.name, 
         price: req.body.price, 
         description: req.body.description, 
-        imageUrl: req.body.imageUrl,
+        imageUrl: image.path,
         userId: req.session.user._id
     });
     product.save().then((result) => {
@@ -70,10 +97,14 @@ exports.postUpdateProduct = (req, res, next) => {
         if(product.userId.toString() !== req.session.user._id.toString()){
           return res.redirect('/admin/products');
         }
-        product.title = req.body.name, 
-        product.price = req.body.price, 
-        product.description = req.body.description, 
-        product.imageUrl = req.body.imageUrl
+        const image = req.file;
+
+        product.title = req.body.name;
+        product.price = req.body.price;
+        product.description = req.body.description;
+        if(image){
+          product.imageUrl = image.path;
+        }
       
       return product.save();
     })

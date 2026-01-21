@@ -51,27 +51,31 @@ exports.postLogin = async (req, res, next) => {
                 oldInput: { email }
             });
         }
-        // 2. Find user by email
-        const userData = await user.findOne({ email });
+        try{
+            // 2. Find user by email
+            const userData = await user.findOne({ email });
 
-        if (!userData) {
-            req.flash("error", "User not found");
-            return res.redirect("/login");
+            if (!userData) {
+                req.flash("error", "User not found");
+                return res.redirect("/login");
+            }
+            // 3. Compare password
+            const isMatch = await bcrypt.compare(password, userData.password);
+
+            if (!isMatch) {
+                req.flash("error", "Incorrect password");
+                return res.redirect("/login");
+            }
+
+            // 4. Create session
+            req.session.isLoggedIn = true;
+            req.session.user = userData;
+
+            return res.redirect("/");
         }
-
-        // 3. Compare password
-        const isMatch = await bcrypt.compare(password, userData.password);
-
-        if (!isMatch) {
-            req.flash("error", "Incorrect password");
-            return res.redirect("/login");
+        catch(err){
+            throw new Error(err);
         }
-
-        // 4. Create session
-        req.session.isLoggedIn = true;
-        req.session.user = userData;
-
-        return res.redirect("/");
 
     } catch (error) {
         console.error(error);

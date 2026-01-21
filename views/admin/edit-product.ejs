@@ -1,6 +1,6 @@
 <!-- we need to create a html page with add product form and in header navigation bar-->
         <h1>Welcome to the Product Management System</h1>
-        <form action="/admin/update-product" method="POST">
+        <form action="/admin/update-product" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<%= product._id%>">
             <label for="name">Name:</label>
             <input class="form-control" type="text" id="name" name="name" value="<%= product.title %>" required><br><br>
@@ -12,7 +12,7 @@
             <input class="form-control" type="number" id="price" value="<%= product.price %>" name="price" required><br><br>
 
             <label for="imageUrl">Image URL:</label>
-            <input class="form-control" type="text" id="imageUrl" value="<%= product.imageUrl %>" name="imageUrl" required> <br><br>
+            <input class="form-control" type="file" id="image" name="image"> <br><br>
 
             <button type="submit" class="btn btn-primary">Update Product</button>
             <button type="reset">Reset</button>
